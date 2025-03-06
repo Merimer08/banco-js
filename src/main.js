@@ -146,6 +146,8 @@ const inputCloseUsername = document.querySelector(".form__input--user");
 const inputClosePin = document.querySelector(".form__input--pin");
 // Variables para el temporizador de cierre de sesión
 let currentAccount, timer;
+// Variables para el estado de ordenamiento
+let sorted = false;
 
 // creamos el campo username para todas las cuentas de usuarios
 // usamos forEach para modificar el array original, en otro caso map
@@ -234,7 +236,28 @@ const updateUI = function ({ movements }) {
   // ingresos y gastos
   displaySummary(movements);
 };
-const displayMovements = function (movements) {};
+
+// Función para mostrar los movimientos
+const displayMovements = function (movements, sort = false) {
+  containerMovements.innerHTML = '';
+  
+  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+  
+  movs.forEach(function(mov, i) {
+    const type = mov > 0 ? 'deposit' : 'withdrawal';
+    
+    const html = `
+      <div class="movements__row">
+        <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
+        <div class="movements__date">3 days ago</div>
+        <div class="movements__value">${mov.toFixed(2)}€</div>
+      </div>
+    `;
+    
+    containerMovements.insertAdjacentHTML('afterbegin', html);
+  });
+};
+
 const displayBalance = function (movements) {
   // calculamos suma de ingresos y retiradas de efectivo
   const balance = movements.reduce((total, movement) => total + movement, 0);
@@ -390,4 +413,11 @@ btnClose.addEventListener('click', function(e) {
   containerApp.style.opacity = 0;
   
   alert('Cuenta cerrada con éxito. Ha sido desconectado.');
+});
+
+// Event listener para el botón de ordenamiento
+btnSort.addEventListener('click', function(e) {
+  e.preventDefault();
+  displayMovements(currentAccount.movements, !sorted);
+  sorted = !sorted;
 });
