@@ -144,6 +144,9 @@ const inputTransferAmount = document.querySelector(".form__input--amount");
 const inputLoanAmount = document.querySelector(".form__input--loan-amount");
 const inputCloseUsername = document.querySelector(".form__input--user");
 const inputClosePin = document.querySelector(".form__input--pin");
+// Variables para el temporizador de cierre de sesión
+let currentAccount, timer;
+
 // creamos el campo username para todas las cuentas de usuarios
 // usamos forEach para modificar el array original, en otro caso map
 const createUsernames = function (accounts) {
@@ -156,31 +159,71 @@ const createUsernames = function (accounts) {
   });
 };
 createUsernames(accounts);
+
+// Función para iniciar el temporizador de cierre de sesión
+const startLogoutTimer = function() {
+  const tick = function() {
+    const min = String(Math.trunc(time / 60)).padStart(2, 0);
+    const sec = String(time % 60).padStart(2, 0);
+    
+    // En cada tick, actualizar el temporizador en la UI
+    labelTimer.textContent = `${min}:${sec}`;
+    
+    // Cuando llegue a 0, cerrar sesión
+    if (time === 0) {
+      clearInterval(timer);
+      labelWelcome.textContent = 'Log in to get started';
+      containerApp.style.opacity = 0;
+    }
+    
+    // Decrementar el tiempo
+    time--;
+  };
+  
+  // Establecer tiempo a 5 minutos
+  let time = 300;
+  
+  // Llamar al tick cada segundo
+  tick();
+  timer = setInterval(tick, 1000);
+  
+  return timer;
+};
+
+// Función para resetear el temporizador
+const resetLogoutTimer = function() {
+  clearInterval(timer);
+  startLogoutTimer();
+};
+
+// Modificar el event listener de login para incluir el temporizador
 btnLogin.addEventListener("click", function (e) {
-  // evitar que el formulario se envíe
   e.preventDefault();
-  // recojo el username y el pin y los comparo con los datos de las cuentas
+  
   const inputUsername = inputLoginUsername.value;
   const inputPin = Number(inputLoginPin.value);
-  const account = accounts.find(
+  currentAccount = accounts.find(
     (account) => account.username === inputUsername
   );
-  // .find((account) => account.pin === inputPin);
-  // lo anterior no funciona porque account ya es un array
-  if (account && account.pin === inputPin) {
-    // MÁS CONCISO:  if (account?.pin === inputPin) {
-    // si el usuario y el pin son correctos
-    // mensaje de bienvenida y que se vea la aplicación
+
+  if (currentAccount && currentAccount.pin === inputPin) {
     containerApp.style.opacity = 1;
-    labelWelcome.textContent = `Welcome back, ${account.owner.split(" ")[0]}`;
-    // limpiar formulario
+    labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(" ")[0]}`;
+    
+    // Limpiar formulario
     inputLoginUsername.value = inputLoginPin.value = "";
-    // cargar los datos (movimientos de la cuenta)
-    updateUI(account);
+    
+    // Iniciar el temporizador de cierre de sesión
+    if (timer) clearInterval(timer);
+    startLogoutTimer();
+    
+    // Cargar los datos
+    updateUI(currentAccount);
   } else {
     console.log("login incorrecto");
   }
 });
+
 const updateUI = function ({ movements }) {
   // const {movements} = account.movements
   // mostrar los movimientos de la cuenta
@@ -219,6 +262,7 @@ const hasValidDeposit = function(movements, loanAmount) {
 // Event listener para el botón de préstamo
 btnLoan.addEventListener('click', function(e) {
   e.preventDefault();
+  resetLogoutTimer();
   
   const loanAmount = Number(inputLoanAmount.value);
   
@@ -258,6 +302,7 @@ btnLoan.addEventListener('click', function(e) {
 // Event listener para el botón de transferencia
 btnTransfer.addEventListener('click', function(e) {
   e.preventDefault();
+  resetLogoutTimer();
   
   const amount = Number(inputTransferAmount.value);
   const recipientUsername = inputTransferTo.value;
@@ -305,6 +350,7 @@ btnTransfer.addEventListener('click', function(e) {
 // Event listener para el botón de cerrar cuenta
 btnClose.addEventListener('click', function(e) {
   e.preventDefault();
+  resetLogoutTimer();
   
   const username = inputCloseUsername.value;
   const pin = Number(inputClosePin.value);
