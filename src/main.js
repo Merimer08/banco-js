@@ -329,12 +329,19 @@ btnClose.addEventListener('click', function(e) {
   const accountIndex = accounts.findIndex(acc => acc.username === username);
   accounts.splice(accountIndex, 1);
   
-  // Ocultar la interfaz
-  containerApp.style.opacity = 0;
+  // Limpiar los campos de login
+  inputLoginUsername.value = '';
+  inputLoginPin.value = '';
   
-  // Limpiar el formulario
+  // Limpiar el formulario de cierre
   inputCloseUsername.value = '';
   inputClosePin.value = '';
   
-  alert('Cuenta cerrada con éxito');
+  // Resetear el mensaje de bienvenida
+  labelWelcome.textContent = 'Log in to get started';
+  
+  // Ocultar la interfaz
+  containerApp.style.opacity = 0;
+  
+  alert('Cuenta cerrada con éxito. Ha sido desconectado.');
 });
