@@ -360,12 +360,12 @@ btnTransfer.addEventListener('click', function(e) {
   currentAccount.movements.push(-amount);
   recipientAccount.movements.push(amount);
   
-  // Actualizar la interfaz
-  updateUI(currentAccount);
-  
   // Limpiar el formulario
   inputTransferTo.value = '';
   inputTransferAmount.value = '';
+  
+  // Actualizar la interfaz
+  updateUI(currentAccount);
   
   alert('Transferencia realizada con éxito');
 });
