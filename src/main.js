@@ -254,3 +254,50 @@ btnLoan.addEventListener('click', function(e) {
     alert('Lo sentimos, necesita tener al menos un depósito que supere el 10% del monto solicitado');
   }
 });
+
+// Event listener para el botón de transferencia
+btnTransfer.addEventListener('click', function(e) {
+  e.preventDefault();
+  
+  const amount = Number(inputTransferAmount.value);
+  const recipientUsername = inputTransferTo.value;
+  
+  // Validar que el monto sea positivo
+  if (amount <= 0) {
+    alert('Por favor, ingrese un monto válido mayor a 0');
+    return;
+  }
+
+  // Obtener las cuentas
+  const currentAccount = accounts.find(acc => 
+    acc.username === inputLoginUsername.value
+  );
+  const recipientAccount = accounts.find(acc => 
+    acc.username === recipientUsername
+  );
+
+  if (!currentAccount || !recipientAccount) {
+    alert('Error: No se encontró la cuenta del destinatario');
+    return;
+  }
+
+  // Verificar que haya suficiente saldo
+  const currentBalance = currentAccount.movements.reduce((total, movement) => total + movement, 0);
+  if (currentBalance < amount) {
+    alert('Lo sentimos, no tiene suficiente saldo para realizar esta transferencia');
+    return;
+  }
+
+  // Realizar la transferencia
+  currentAccount.movements.push(-amount);
+  recipientAccount.movements.push(amount);
+  
+  // Actualizar la interfaz
+  updateUI(currentAccount);
+  
+  // Limpiar el formulario
+  inputTransferTo.value = '';
+  inputTransferAmount.value = '';
+  
+  alert('Transferencia realizada con éxito');
+});
