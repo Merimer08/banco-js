@@ -301,3 +301,40 @@ btnTransfer.addEventListener('click', function(e) {
   
   alert('Transferencia realizada con éxito');
 });
+
+// Event listener para el botón de cerrar cuenta
+btnClose.addEventListener('click', function(e) {
+  e.preventDefault();
+  
+  const username = inputCloseUsername.value;
+  const pin = Number(inputClosePin.value);
+  
+  // Obtener la cuenta actual
+  const currentAccount = accounts.find(acc => 
+    acc.username === username && acc.pin === pin
+  );
+
+  if (!currentAccount) {
+    alert('Error: Credenciales incorrectas');
+    return;
+  }
+
+  // Verificar que no se esté intentando cerrar la cuenta de otro usuario
+  if (username !== inputLoginUsername.value) {
+    alert('Error: Solo puede cerrar su propia cuenta');
+    return;
+  }
+
+  // Eliminar la cuenta del array de cuentas
+  const accountIndex = accounts.findIndex(acc => acc.username === username);
+  accounts.splice(accountIndex, 1);
+  
+  // Ocultar la interfaz
+  containerApp.style.opacity = 0;
+  
+  // Limpiar el formulario
+  inputCloseUsername.value = '';
+  inputClosePin.value = '';
+  
+  alert('Cuenta cerrada con éxito');
+});
