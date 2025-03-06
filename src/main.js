@@ -238,10 +238,10 @@ const updateUI = function ({ movements }) {
 };
 
 // Función para mostrar los movimientos
-const displayMovements = function (movements, sort = false) {
+const displayMovements = function (movements) {
   containerMovements.innerHTML = '';
   
-  const movs = sort ? movements.slice().sort((a, b) => a - b) : movements;
+  const movs = sorted ? movements.slice().sort((a, b) => a - b) : movements;
   
   movs.forEach(function(mov, i) {
     const type = mov > 0 ? 'deposit' : 'withdrawal';
@@ -418,6 +418,6 @@ btnClose.addEventListener('click', function(e) {
 // Event listener para el botón de ordenamiento
 btnSort.addEventListener('click', function(e) {
   e.preventDefault();
-  displayMovements(currentAccount.movements, !sorted);
   sorted = !sorted;
+  displayMovements(currentAccount.movements);
 });
