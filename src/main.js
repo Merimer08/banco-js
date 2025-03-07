@@ -362,6 +362,15 @@ btnLoan.addEventListener('click', function(e) {
     return;
   }
 
+  // Calcular el balance actual
+  const currentBalance = currentAccount.movements.reduce((total, movement) => total + movement.amount, 0);
+  
+  // Verificar que el préstamo no supere el 200% del balance
+  if (loanAmount > currentBalance * 2) {
+    alert(`El préstamo no puede superar el 200% de su balance actual (${(currentBalance * 2).toFixed(2)}€)`);
+    return;
+  }
+
   // Verificar si hay un depósito válido
   if (hasValidDeposit(currentAccount.movements, loanAmount)) {
     // Agregar el préstamo a los movimientos
@@ -373,7 +382,7 @@ btnLoan.addEventListener('click', function(e) {
     // Limpiar el formulario
     inputLoanAmount.value = '';
     
-    alert('¡Préstamo aprobado!');
+    alert(`¡Préstamo de ${loanAmount.toFixed(2)}€ aprobado!`);
   } else {
     alert('Lo sentimos, necesita tener al menos un depósito que supere el 10% del monto solicitado');
   }
