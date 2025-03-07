@@ -99,25 +99,58 @@ document.querySelector("#app").innerHTML = `
 // Data
 const account1 = {
   owner: "Juan Sánchez",
-  movements: [200, 450, -400, 3000, -650, -130, 70, 1300],
-  interestRate: 1.2, // %
+  movements: [
+    { amount: 200, date: new Date('2024-03-01') },
+    { amount: 450, date: new Date('2024-03-02') },
+    { amount: -400, date: new Date('2024-03-03') },
+    { amount: 3000, date: new Date('2024-03-04') },
+    { amount: -650, date: new Date('2024-03-05') },
+    { amount: -130, date: new Date('2024-03-06') },
+    { amount: 70, date: new Date('2024-03-07') },
+    { amount: 1300, date: new Date('2024-03-08') }
+  ],
+  interestRate: 1.2,
   pin: 1111,
 };
 const account2 = {
   owner: "María Portazgo",
-  movements: [5000, 3400, -150, -790, -3210, -1000, 8500, -30],
+  movements: [
+    { amount: 5000, date: new Date('2024-03-01') },
+    { amount: 3400, date: new Date('2024-03-02') },
+    { amount: -150, date: new Date('2024-03-03') },
+    { amount: -790, date: new Date('2024-03-04') },
+    { amount: -3210, date: new Date('2024-03-05') },
+    { amount: -1000, date: new Date('2024-03-06') },
+    { amount: 8500, date: new Date('2024-03-07') },
+    { amount: -30, date: new Date('2024-03-08') }
+  ],
   interestRate: 1.5,
   pin: 2222,
 };
 const account3 = {
   owner: "Estefanía Pueyo",
-  movements: [200, -200, 340, -300, -20, 50, 400, -460],
+  movements: [
+    { amount: 200, date: new Date('2024-03-01') },
+    { amount: -200, date: new Date('2024-03-02') },
+    { amount: 340, date: new Date('2024-03-03') },
+    { amount: -300, date: new Date('2024-03-04') },
+    { amount: -20, date: new Date('2024-03-05') },
+    { amount: 50, date: new Date('2024-03-06') },
+    { amount: 400, date: new Date('2024-03-07') },
+    { amount: -460, date: new Date('2024-03-08') }
+  ],
   interestRate: 0.7,
   pin: 3333,
 };
 const account4 = {
   owner: "Javier Rodríguez",
-  movements: [430, 1000, 700, 50, 90],
+  movements: [
+    { amount: 430, date: new Date('2024-03-01') },
+    { amount: 1000, date: new Date('2024-03-02') },
+    { amount: 700, date: new Date('2024-03-03') },
+    { amount: 50, date: new Date('2024-03-04') },
+    { amount: 90, date: new Date('2024-03-05') }
+  ],
   interestRate: 1,
   pin: 4444,
 };
@@ -149,8 +182,10 @@ let currentAccount, timer;
 // Variables para el estado de ordenamiento
 let sorted = false;
 
-// creamos el campo username para todas las cuentas de usuarios
-// usamos forEach para modificar el array original, en otro caso map
+// Asegurarnos de que la interfaz esté oculta al inicio
+containerApp.style.opacity = 0;
+
+// Crear los usernames para las cuentas
 const createUsernames = function (accounts) {
   accounts.forEach(function (account) {
     account.username = account.owner // Juan Sanchez
@@ -161,6 +196,13 @@ const createUsernames = function (accounts) {
   });
 };
 createUsernames(accounts);
+
+// Mostrar la fecha actual
+const now = new Date();
+const day = `${now.getDate()}`.padStart(2, 0);
+const month = `${now.getMonth() + 1}`.padStart(2, 0);
+const year = now.getFullYear();
+labelDate.textContent = `${day}/${month}/${year}`;
 
 // Función para iniciar el temporizador de cierre de sesión
 const startLogoutTimer = function() {
@@ -198,7 +240,7 @@ const resetLogoutTimer = function() {
   startLogoutTimer();
 };
 
-// Modificar el event listener de login para incluir el temporizador
+// Modificar el event listener de login para simplificar
 btnLogin.addEventListener("click", function (e) {
   e.preventDefault();
   
@@ -208,49 +250,60 @@ btnLogin.addEventListener("click", function (e) {
     (account) => account.username === inputUsername
   );
 
-  if (currentAccount && currentAccount.pin === inputPin) {
-    containerApp.style.opacity = 1;
-    labelWelcome.textContent = `Welcome back, ${currentAccount.owner.split(" ")[0]}`;
-    
-    // Limpiar formulario
-    inputLoginUsername.value = inputLoginPin.value = "";
-    
-    // Iniciar el temporizador de cierre de sesión
-    if (timer) clearInterval(timer);
-    startLogoutTimer();
-    
-    // Cargar los datos
-    updateUI(currentAccount);
-  } else {
-    console.log("login incorrecto");
+  if (!currentAccount) {
+    alert('Error: No se encontró la cuenta. Por favor, verifique el nombre de usuario.');
+    return;
   }
+
+  if (currentAccount.pin !== inputPin) {
+    alert('Error: PIN incorrecto. Por favor, intente nuevamente.');
+    return;
+  }
+
+  // Si llegamos aquí, las credenciales son correctas
+  // Limpiar formulario
+  inputLoginUsername.value = inputLoginPin.value = "";
+  
+  // Iniciar el temporizador de cierre de sesión
+  if (timer) clearInterval(timer);
+  startLogoutTimer();
+  
+  // Actualizar toda la interfaz
+  updateUI(currentAccount);
 });
 
-const updateUI = function ({ movements }) {
-  // const {movements} = account.movements
-  // mostrar los movimientos de la cuenta
-  displayMovements(movements);
-  // mostrar el balance de la cuenta
-  displayBalance(movements);
-  // mostrar el total de los movimientos de la cuenta
+const updateUI = function (account) {
+  // Mostrar la interfaz
+  containerApp.style.opacity = 1;
+  
+  // Actualizar mensaje de bienvenida
+  labelWelcome.textContent = `Welcome back, ${account.owner.split(" ")[0]}`;
+  
+  // Mostrar los movimientos de la cuenta
+  displayMovements(account.movements);
+  
+  // Mostrar el balance de la cuenta
+  displayBalance(account.movements);
+  
+  // Mostrar el total de los movimientos de la cuenta
   // ingresos y gastos
-  displaySummary(movements);
+  displaySummary(account.movements);
 };
 
 // Función para mostrar los movimientos
 const displayMovements = function (movements) {
   containerMovements.innerHTML = '';
   
-  const movs = sorted ? movements.slice().sort((a, b) => a - b) : movements;
+  const movs = sorted ? movements.slice().sort((a, b) => a.date - b.date) : movements;
   
   movs.forEach(function(mov, i) {
-    const type = mov > 0 ? 'deposit' : 'withdrawal';
+    const type = mov.amount > 0 ? 'deposit' : 'withdrawal';
     
     const html = `
       <div class="movements__row">
         <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
-        <div class="movements__date">3 days ago</div>
-        <div class="movements__value">${mov.toFixed(2)}€</div>
+        <div class="movements__date">${mov.date.toLocaleDateString()}</div>
+        <div class="movements__value">${mov.amount.toFixed(2)}€</div>
       </div>
     `;
     
@@ -260,25 +313,25 @@ const displayMovements = function (movements) {
 
 const displayBalance = function (movements) {
   // calculamos suma de ingresos y retiradas de efectivo
-  const balance = movements.reduce((total, movement) => total + movement, 0);
+  const balance = movements.reduce((total, movement) => total + movement.amount, 0);
   // actualizamos el DOM:
   labelBalance.textContent = `${balance.toFixed(2)} €`;
 };
 const displaySummary = function (movements) {
   const sumIn = movements
-    .filter((movement) => movement > 0)
-    .reduce((total, movement) => total + movement, 0);
+    .filter((movement) => movement.amount > 0)
+    .reduce((total, movement) => total + movement.amount, 0);
   labelSumIn.textContent = `${sumIn.toFixed(2)} €`;
   const sumOut = movements
-    .filter((movement) => movement < 0)
-    .reduce((total, movement) => total + movement, 0);
+    .filter((movement) => movement.amount < 0)
+    .reduce((total, movement) => total + movement.amount, 0);
   labelSumOut.textContent = `${sumOut.toFixed(2)} €`;
 };
 
 // Función para validar si hay un depósito que supere el 10% del monto solicitado
 const hasValidDeposit = function(movements, loanAmount) {
   return movements.some(movement => 
-    movement > 0 && movement >= loanAmount * 0.1
+    movement.amount > 0 && movement.amount >= loanAmount * 0.1
   );
 };
 
@@ -295,20 +348,10 @@ btnLoan.addEventListener('click', function(e) {
     return;
   }
 
-  // Obtener la cuenta actual
-  const currentAccount = accounts.find(acc => 
-    acc.username === inputLoginUsername.value
-  );
-
-  if (!currentAccount) {
-    alert('Error: No se encontró la cuenta');
-    return;
-  }
-
   // Verificar si hay un depósito válido
   if (hasValidDeposit(currentAccount.movements, loanAmount)) {
     // Agregar el préstamo a los movimientos
-    currentAccount.movements.push(loanAmount);
+    currentAccount.movements.push({ amount: loanAmount, date: new Date() });
     
     // Actualizar la interfaz
     updateUI(currentAccount);
@@ -336,29 +379,26 @@ btnTransfer.addEventListener('click', function(e) {
     return;
   }
 
-  // Obtener las cuentas
-  const currentAccount = accounts.find(acc => 
-    acc.username === inputLoginUsername.value
-  );
+  // Obtener la cuenta del destinatario
   const recipientAccount = accounts.find(acc => 
     acc.username === recipientUsername
   );
 
-  if (!currentAccount || !recipientAccount) {
+  if (!recipientAccount) {
     alert('Error: No se encontró la cuenta del destinatario');
     return;
   }
 
   // Verificar que haya suficiente saldo
-  const currentBalance = currentAccount.movements.reduce((total, movement) => total + movement, 0);
+  const currentBalance = currentAccount.movements.reduce((total, movement) => total + movement.amount, 0);
   if (currentBalance < amount) {
     alert('Lo sentimos, no tiene suficiente saldo para realizar esta transferencia');
     return;
   }
 
   // Realizar la transferencia
-  currentAccount.movements.push(-amount);
-  recipientAccount.movements.push(amount);
+  currentAccount.movements.push({ amount: -amount, date: new Date() });
+  recipientAccount.movements.push({ amount: amount, date: new Date() });
   
   // Limpiar el formulario
   inputTransferTo.value = '';
