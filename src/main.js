@@ -1,4 +1,7 @@
 import "./style.css";
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
+
 document.querySelector("#app").innerHTML = `
     <nav>
       <p class="welcome">Log in to get started</p>
@@ -181,6 +184,7 @@ const inputClosePin = document.querySelector(".form__input--pin");
 let currentAccount, timer;
 // Variables para el estado de ordenamiento
 let sorted = false;
+let sortDirection = 'desc'; // 'asc' o 'desc'
 
 // Asegurarnos de que la interfaz esté oculta al inicio
 containerApp.style.opacity = 0;
@@ -294,7 +298,17 @@ const updateUI = function (account) {
 const displayMovements = function (movements) {
   containerMovements.innerHTML = '';
   
-  const movs = sorted ? movements.slice().sort((a, b) => a.date - b.date) : movements;
+  let movs = movements.slice();
+  
+  if (sorted) {
+    movs.sort((a, b) => {
+      if (sortDirection === 'asc') {
+        return a.date - b.date;
+      } else {
+        return b.date - a.date;
+      }
+    });
+  }
   
   movs.forEach(function(mov, i) {
     const type = mov.amount > 0 ? 'deposit' : 'withdrawal';
@@ -302,7 +316,7 @@ const displayMovements = function (movements) {
     const html = `
       <div class="movements__row">
         <div class="movements__type movements__type--${type}">${i + 1} ${type}</div>
-        <div class="movements__date">${mov.date.toLocaleDateString()}</div>
+        <div class="movements__date">${formatDistanceToNow(mov.date, { addSuffix: true, locale: es })}</div>
         <div class="movements__value">${mov.amount.toFixed(2)}€</div>
       </div>
     `;
@@ -459,5 +473,13 @@ btnClose.addEventListener('click', function(e) {
 btnSort.addEventListener('click', function(e) {
   e.preventDefault();
   sorted = !sorted;
+  
+  if (sorted) {
+    sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+    btnSort.innerHTML = `&${sortDirection === 'asc' ? 'uparrow' : 'downarrow'}; SORT`;
+  } else {
+    btnSort.innerHTML = '&downarrow; SORT';
+  }
+  
   displayMovements(currentAccount.movements);
 });

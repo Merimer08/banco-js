@@ -6,3 +6,5 @@
 - npm install gh-pages --save-dev
 - npm run deploy
 
+
+-npm install date-fns -- par mostrar las fechas en formato relativo
