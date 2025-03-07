@@ -432,19 +432,37 @@ btnClose.addEventListener('click', function(e) {
   const username = inputCloseUsername.value;
   const pin = Number(inputClosePin.value);
   
+  // Validar que los campos no estén vacíos
+  if (!username || !pin) {
+    alert('Por favor, complete todos los campos');
+    return;
+  }
+
   // Obtener la cuenta actual
-  const currentAccount = accounts.find(acc => 
+  const accountToClose = accounts.find(acc => 
     acc.username === username && acc.pin === pin
   );
 
-  if (!currentAccount) {
+  if (!accountToClose) {
     alert('Error: Credenciales incorrectas');
     return;
   }
 
   // Verificar que no se esté intentando cerrar la cuenta de otro usuario
-  if (username !== inputLoginUsername.value) {
+  if (username !== currentAccount.username) {
     alert('Error: Solo puede cerrar su propia cuenta');
+    return;
+  }
+
+  // Verificar que la cuenta no tenga saldo pendiente
+  const currentBalance = accountToClose.movements.reduce((total, movement) => total + movement.amount, 0);
+  if (currentBalance !== 0) {
+    alert('No puede cerrar su cuenta mientras tenga saldo pendiente. Por favor, retire todo su dinero primero.');
+    return;
+  }
+
+  // Confirmar el cierre de cuenta
+  if (!confirm('¿Está seguro de que desea cerrar su cuenta? Esta acción no se puede deshacer.')) {
     return;
   }
 
